@@ -1,7 +1,10 @@
 var click_points = [];
 
+var container = document.getElementById('container');
 var canvas = document.getElementById('canvas');
 var context = canvas.getContext('2d');
+canvas.width = container.clientWidth;
+canvas.height = container.clientHeight;
 
 function drawLine(x1, y1, x2, y2) {
   context.strokeStyle = 'rgb(0, 0, 0)'
