@@ -1,4 +1,6 @@
 var click_points = [];
+var line_x2ys = {};
+var target_x2ys = {};
 
 var container = document.getElementById('container');
 var canvas = document.getElementById('canvas');
@@ -28,12 +30,7 @@ canvas.addEventListener('click', function(e) {
   if (!exist) {
     click_points.push({"x":x, "y":y});
   }
-  reflesh();
-}, false);
 
-function reflesh() {
-  context.fillStyle = 'rgb(255, 255, 255)'
-  context.fillRect(0, 0, canvas.width, canvas.height);
   var prev_x;
   var prev_y;
   for (var x = 0; x < canvas.width; x++) {
@@ -49,12 +46,30 @@ function reflesh() {
       }
       y += tmp;
     }
-    if (prev_x && prev_y) {
-      drawLine(prev_x, prev_y, x, y);
-    }
-    prev_x = x;
-    prev_y = y;
+    target_x2ys[x] = y;
   }
+}, false);
+
+function reflesh() {
+  context.fillStyle = 'rgb(255, 255, 255)'
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  if (line_x2ys[0]) {
+    line_x2ys[0] = (line_x2ys[0] * 19 + target_x2ys[0]) / 20;
+  } else {
+    line_x2ys[0] = target_x2ys[0];
+  }
+  for (var x = 1; x < canvas.width; x++) {
+    if (line_x2ys[x]) {
+      line_x2ys[x] = (line_x2ys[x] * 19 + target_x2ys[x]) / 20;
+    } else {
+      line_x2ys[x] = target_x2ys[x];
+    }
+    if (line_x2ys[x - 1] && line_x2ys[x]) {
+      drawLine(x - 1, line_x2ys[x - 1], x, line_x2ys[x]);
+    }
+  }
+
   for (var idx in click_points) {
     var point = click_points[idx];
     context.beginPath();
@@ -62,4 +77,6 @@ function reflesh() {
     context.strokeStyle = 'rgb(0, 0, 255)';
     context.stroke();
   }
+  setInterval("reflesh()", 16);
 }
+reflesh();
