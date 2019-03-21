@@ -15,6 +15,25 @@ function drawLine(x1, y1, x2, y2) {
   context.lineTo(x2, y2);
   context.stroke(); 
 }
+function update_target() {
+  for (var x = 0; x < canvas.width; x++) {
+    var y = 0;
+    for (var idx in click_points) {
+      var point = click_points[idx];
+      var tmp = 1.0 * point.y;
+      for (var idx2 in click_points) {
+        var point2 = click_points[idx2];
+        if (point != point2) {
+          tmp *= (x - point2.x) / (point.x - point2.x);
+        }
+      }
+      y += tmp;
+    }
+    target_x2ys[x] = y;
+  }
+  reflesh(30);
+}
+
 canvas.addEventListener('click', function(e) {
   var rect = e.target.getBoundingClientRect();
   var x = e.clientX - rect.left;
@@ -31,37 +50,25 @@ canvas.addEventListener('click', function(e) {
     click_points.push({"x":x, "y":y});
   }
 
-  var prev_x;
-  var prev_y;
-  for (var x = 0; x < canvas.width; x++) {
-    var y = 0;
-    for (var idx in click_points) {
-      var point = click_points[idx];
-      var tmp = 1.0 * point.y;
-      for (var idx2 in click_points) {
-        var point2 = click_points[idx2];
-        if (point != point2) {
-          tmp *= (x - point2.x) / (point.x - point2.x);
-        }
-      }
-      y += tmp;
-    }
-    target_x2ys[x] = y;
-  }
+  update_target();
 }, false);
 
-function reflesh() {
+function reflesh(rest_frame) {
+  if (rest_frame <= 0) {
+    return;
+  }
+
   context.fillStyle = 'rgb(255, 255, 255)'
   context.fillRect(0, 0, canvas.width, canvas.height);
 
   if (line_x2ys[0]) {
-    line_x2ys[0] = (line_x2ys[0] * 19 + target_x2ys[0]) / 20;
+    line_x2ys[0] = (line_x2ys[0] * 4 + target_x2ys[0]) / 5;
   } else {
     line_x2ys[0] = target_x2ys[0];
   }
   for (var x = 1; x < canvas.width; x++) {
     if (line_x2ys[x]) {
-      line_x2ys[x] = (line_x2ys[x] * 19 + target_x2ys[x]) / 20;
+      line_x2ys[x] = (line_x2ys[x] * 4 + target_x2ys[x]) / 5;
     } else {
       line_x2ys[x] = target_x2ys[x];
     }
@@ -77,6 +84,7 @@ function reflesh() {
     context.strokeStyle = 'rgb(0, 0, 255)';
     context.stroke();
   }
-  setInterval("reflesh()", 16);
+  setTimeout(function() {
+    reflesh(rest_frame - 1)
+  }, 16);
 }
-reflesh();
