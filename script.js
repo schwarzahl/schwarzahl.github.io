@@ -8,6 +8,8 @@ var context = canvas.getContext('2d');
 canvas.width = container.clientWidth;
 canvas.height = container.clientHeight;
 
+context.fillText("Click: add point, Z: undo", canvas.width / 2, canvas.height / 2);
+
 function drawLine(x1, y1, x2, y2) {
   context.strokeStyle = 'rgb(0, 0, 0)'
   context.beginPath();
@@ -52,6 +54,13 @@ canvas.addEventListener('click', function(e) {
 
   update_target();
 }, false);
+
+document.addEventListener('keydown', function(e) {
+  if (e.key == 'z') {
+    click_points.pop();
+    update_target();
+  }
+});
 
 function reflesh(rest_frame) {
   if (rest_frame <= 0) {
